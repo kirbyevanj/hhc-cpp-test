@@ -32,12 +32,21 @@ hcc-cpp/
 # Create build directory
 mkdir build && cd build
 
-# Configure the project
+# Configure the project (defaults to Release build)
 cmake ..
+
+# Or specify build type explicitly
+cmake -DCMAKE_BUILD_TYPE=Release ..
 
 # Build all targets
 cmake --build .
 ```
+
+**Build Types:**
+- `Release` (default) - Optimized for performance, recommended for benchmarks
+- `Debug` - Include debug symbols, no optimizations
+- `RelWithDebInfo` - Optimized with debug info
+- `MinSizeRel` - Optimized for size
 
 ## Running Tests
 

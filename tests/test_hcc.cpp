@@ -15,8 +15,18 @@ TEST(HccTest, DecodeTest) {
 
 // Test for hcc_32bit_encode
 TEST(HccTest, Encode32BitTest) {
-    // Mock test - just verify the function can be called
-    EXPECT_NO_THROW(hcc::hcc_32bit_encode());
+    uint32_t input = 0;
+    char output[9] = {0};
+    hcc::hcc_32bit_encode(input, output);
+    EXPECT_EQ(output[0], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[1], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[2], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[3], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[4], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[5], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[6], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[7], hcc::HHC_ALPHABET[0]);
+    EXPECT_EQ(output[8], hcc::HHC_ALPHABET[0]);
 }
 
 // Test for hcc_32bit_decode

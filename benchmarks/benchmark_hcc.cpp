@@ -22,8 +22,12 @@ BENCHMARK(BM_HccDecode);
 // Benchmark for hcc_32bit_encode
 static void BM_Hcc32BitEncode(benchmark::State& state) {
     for (auto _ : state) {
-        hcc::hcc_32bit_encode();
-        benchmark::ClobberMemory();
+        const uint32_t input = rand();
+
+        char output[9] = {0};
+        hcc::hcc_32bit_encode(input, output);
+
+        benchmark::DoNotOptimize(output);
     }
 }
 BENCHMARK(BM_Hcc32BitEncode);
