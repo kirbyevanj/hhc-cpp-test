@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+project(hhc-cpp-benchmarks VERSION 1.0.0 LANGUAGES CXX)
 
 include(ExternalProject)
 
@@ -31,9 +32,9 @@ set_target_properties(benchmark_main PROPERTIES
 )
 
 # Benchmark executable
-add_executable(hcc_benchmarks benchmark_hcc.cpp)
-target_link_libraries(hcc_benchmarks PRIVATE hcc-cpp benchmark_lib benchmark_main pthread)
-target_include_directories(hcc_benchmarks PRIVATE
+add_executable(hhc_benchmarks benchmark_hhc.cpp)
+target_link_libraries(hhc_benchmarks PRIVATE hhc-cpp benchmark_lib benchmark_main pthread)
+target_include_directories(hhc_benchmarks PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/benchmark-install/include
 )
-add_dependencies(hcc_benchmarks benchmark)
+add_dependencies(hhc_benchmarks benchmark)

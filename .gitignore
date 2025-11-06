@@ -8,6 +8,10 @@ Makefile
 *.cmake
 !CMakeLists.txt
 
+# Clangd
+compile_commands.json
+.cache/
+
 # IDE specific files
 .vscode/
 .idea/
@@ -29,8 +33,8 @@ Makefile
 *.obj
 
 # Test and benchmark executables
-hcc_tests
-hcc_benchmarks
+hhc_tests
+hhc_benchmarks
 
 # External project downloads
 tests/googletest/

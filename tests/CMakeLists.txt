@@ -30,12 +30,12 @@ set_target_properties(gtest_main PROPERTIES
 )
 
 # Test executable
-add_executable(hcc_tests test_hcc.cpp)
-target_link_libraries(hcc_tests PRIVATE hcc-cpp gtest gtest_main pthread)
-target_include_directories(hcc_tests PRIVATE
+add_executable(hhc_tests test_hhc.cpp)
+target_link_libraries(hhc_tests PRIVATE hhc-cpp gtest gtest_main pthread)
+target_include_directories(hhc_tests PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}/googletest-install/include
 )
-add_dependencies(hcc_tests googletest)
+add_dependencies(hhc_tests googletest)
 
 # Add test to CTest
-add_test(NAME hcc_tests COMMAND hcc_tests)
+add_test(NAME hhc_tests COMMAND hhc_tests)
