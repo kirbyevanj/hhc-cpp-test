@@ -9,40 +9,25 @@
 
 namespace hhc {
     constexpr uint32_t BITS_PER_BYTE = 8;
-    constexpr size_t HHC_32BIT_ENCODED_LENGTH = 8;
+    constexpr size_t HHC_32BIT_ENCODED_LENGTH = 6;
+    constexpr size_t HHC_64BIT_ENCODED_LENGTH = 11;
 
     /**
-     * @brief Encode a 32-bit integer into an 8-character string with padding, but no padding in first two characters
-     * @note The first two characters are not padded, so the output string is 8 characters long
+     * @brief Encode a 32-bit integer into a 6-character string
+     * @note You must ensure the output string is at least 8 bytes long for performance reasons
      * @note The output string is not null-terminated
-     * @note This version is fastest because it does not need to assign the first two characters
-     * @param input The 32-bit integer to encode
-     * @param output_string The output string to write the encoded result to
-     */
-    constexpr void hhc_32bit_encode_padded_raw(uint32_t input, char* output_string) {
-        assert(output_string != nullptr);
-        auto* output = reinterpret_cast<uint64_t*>(output_string);
-
-        for (int iter = 7; iter >= 2; iter--) {
-            const uint32_t index = input % BASE;
-            input /= BASE;
-            *output ^= static_cast<uint64_t>(ALPHABET[index]) << (BITS_PER_BYTE * iter);
-        }
-    }
-
-    /**
-     * @brief Encode a 32-bit integer into an 8-character string with padding, assigning the first two characters to '-'
-     * @note The first two characters are padded with '-', so the output string is 8 characters long
-     * @note The output string is not null-terminated
-     * @note This version is slightly slower because it needs to assign the first two characters
      * @param input The 32-bit integer to encode
      * @param output_string The output string to write the encoded result to
      */
     constexpr void hhc_32bit_encode_padded(uint32_t input, char* output_string) {
         assert(output_string != nullptr);
-        output_string[0] = ALPHABET[0];
-        output_string[1] = ALPHABET[0];
-        hhc_32bit_encode_padded_raw(input, output_string);
+
+        for (uint32_t pos = HHC_32BIT_ENCODED_LENGTH; pos > 0; --pos) {
+            const uint32_t index = input % BASE;
+            input /= BASE;
+            output_string[pos - 1] = ALPHABET[index];
+
+        }
     }
 
     /**
@@ -59,7 +44,7 @@ namespace hhc {
     }
 
     /**
-     * @brief Encode a 32-bit integer into an 8-character string without padding
+     * @brief Encode a 32-bit integer into a 6-character string without padding
      * @note The output string is not null-terminated
      * @note This version is slower because it needs to unpad the string
      * @param input The 32-bit integer to encode
@@ -72,7 +57,7 @@ namespace hhc {
     }
 
     /**
-     * @brief Decode a 32-bit integer from an 8-character string
+     * @brief Decode a 32-bit integer from a 6-character string
      * @param input_string The input string to decode
      * @return The decoded 32-bit integer
      */
@@ -81,14 +66,47 @@ namespace hhc {
         uint32_t output = 0;
         uint32_t exponent = 1;
 
-        for (int iter = 7; iter >= 2; --iter) {
-            const uint32_t index = INVERSE_ALPHABET[input_string[iter]];
+        for (uint32_t pos = HHC_32BIT_ENCODED_LENGTH; pos > 0; --pos) {
+            const uint32_t index = INVERSE_ALPHABET[static_cast<unsigned char>(input_string[pos-1])];
             output += index * exponent;
             exponent *= BASE;
         }
         return output;
     }
 
+
+    /**
+     * @brief Encode a 64-bit integer into a 11-character string
+     * @note You must ensure the output string is at least 16 bytes long for performance reasons
+     * @note The output string is not null-terminated
+     * @param input The 64-bit integer to encode
+     * @param output_string The output string to write the encoded result to
+     */
+    constexpr void hhc_64bit_encode_padded(uint64_t input, char* output_string) {
+        assert(output_string != nullptr);
+        for (uint32_t pos = HHC_64BIT_ENCODED_LENGTH; pos > 0; --pos) {
+            const uint32_t index = input % BASE;
+            input /= BASE;
+            output_string[pos - 1] = ALPHABET[index];
+        }
+    }
+
+    /**
+     * @brief Decode a 64-bit integer from a 11-character string
+     * @param input_string The input string to decode
+     * @return The decoded 64-bit integer
+     */
+    constexpr uint64_t hhc_64bit_decode(const char* input_string) {
+        assert(input_string != nullptr);
+        uint64_t output = 0;
+        uint64_t exponent = 1;
+        for (uint32_t pos = HHC_64BIT_ENCODED_LENGTH; pos > 0; --pos) {
+            const uint32_t index = INVERSE_ALPHABET[static_cast<unsigned char>(input_string[pos-1])];
+            output += static_cast<uint64_t>(index) * exponent;
+            exponent *= BASE;
+        }
+        return output;
+    }
 } // namespace hhc
 
 #endif // hhc_HPP

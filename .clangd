@@ -19,11 +19,11 @@ Diagnostics:
       - modernize-*
       - performance-*
       - readability-*
-      - bugprone-*
     Remove:
       - modernize-use-trailing-return-type
       - readability-identifier-length
       - readability-magic-numbers
+      - bugprone-string-literal-with-embedded-nul
 
 Index:
   Background: Build
