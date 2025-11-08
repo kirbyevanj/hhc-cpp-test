@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <string_view>
 
 /**
  * @file encode64_tests.cpp
@@ -32,5 +33,27 @@ TEST(HhcEncode64Test, Encode64BitTestUINT64_MAX) {
     std::string output(HHC_64BIT_STRING_LENGTH, '\0');
     hhc_64bit_encode_padded(U64_MAX_VALUE, output.data());
     EXPECT_EQ(output.substr(0, HHC_64BIT_ENCODED_LENGTH), "9lH9ebONzYD");
+}
+
+TEST(HhcEncode64Test, Encode64BitUnpaddedZeroProducesSpaces) {
+    std::string output(HHC_64BIT_STRING_LENGTH, '\0');
+    hhc_64bit_encode_unpadded(U64_MIN_VALUE, output.data());
+    std::string_view unpadded(output.data(), hhc::HHC_64BIT_ENCODED_LENGTH);
+    EXPECT_EQ(unpadded, std::string(hhc::HHC_64BIT_ENCODED_LENGTH, ' '));
+}
+
+TEST(HhcEncode64Test, Encode64BitUnpaddedPreservesSignificantDigits) {
+    std::string output(HHC_64BIT_STRING_LENGTH, '\0');
+    constexpr uint64_t kValue = 1;
+    hhc_64bit_encode_unpadded(kValue, output.data());
+    std::string_view unpadded(output.data(), hhc::HHC_64BIT_ENCODED_LENGTH);
+    EXPECT_EQ(unpadded, "          .");
+}
+
+TEST(HhcEncode64Test, Encode64BitUnpaddedMaxRemainsUnchanged) {
+    std::string output(HHC_64BIT_STRING_LENGTH, '\0');
+    hhc_64bit_encode_unpadded(U64_MAX_VALUE, output.data());
+    std::string_view unpadded(output.data(), hhc::HHC_64BIT_ENCODED_LENGTH);
+    EXPECT_EQ(unpadded, "9lH9ebONzYD");
 }
 

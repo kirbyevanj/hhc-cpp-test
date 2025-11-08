@@ -71,8 +71,14 @@ if(HHC_ENABLE_COVERAGE)
         COMMAND ${CMAKE_COMMAND} -E rm -f ${HHC_COVERAGE_DIR}/hhc_tests.profraw ${HHC_COVERAGE_DIR}/hhc_tests.profdata
         COMMAND ${CMAKE_COMMAND} -E env LLVM_PROFILE_FILE=${HHC_COVERAGE_DIR}/hhc_tests.profraw $<TARGET_FILE:hhc_tests>
         COMMAND ${LLVM_PROFDATA} merge -sparse ${HHC_COVERAGE_DIR}/hhc_tests.profraw -o ${HHC_COVERAGE_DIR}/hhc_tests.profdata
-        COMMAND ${LLVM_COV} report $<TARGET_FILE:hhc_tests> --instr-profile=${HHC_COVERAGE_DIR}/hhc_tests.profdata --ignore-filename-regex="(tests/|benchmarks/|fuzz/)" --summary-only --output-file=${HHC_COVERAGE_DIR}/coverage.txt
-        COMMAND ${LLVM_COV} show $<TARGET_FILE:hhc_tests> --instr-profile=${HHC_COVERAGE_DIR}/hhc_tests.profdata --format=html --output-dir=${HHC_COVERAGE_DIR}/html --ignore-filename-regex="(tests/|benchmarks/|fuzz/)"
+        COMMAND ${CMAKE_COMMAND}
+                -DBUILD_DIR=${CMAKE_BINARY_DIR}
+                -DLLVM_COV=${LLVM_COV}
+                -DTARGET_EXE=$<TARGET_FILE:hhc_tests>
+                -DPROFILE_DATA=${HHC_COVERAGE_DIR}/hhc_tests.profdata
+                -DOUTPUT_DIR=${HHC_COVERAGE_DIR}
+                "-DIGNORE_REGEX=\\(tests/\\|benchmarks/\\|fuzz/\\)"
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_coverage.cmake
         DEPENDS hhc_tests
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         USES_TERMINAL

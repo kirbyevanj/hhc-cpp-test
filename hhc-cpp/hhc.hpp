@@ -149,7 +149,7 @@ namespace hhc {
         assert(max_string != nullptr);
         while (*max_string != '\0') {
             const auto current = static_cast<unsigned char>(*input_string);
-            const auto maximum = static_cast<unsigned char>(*max_string++);
+            const auto maximum = static_cast<unsigned char>(*max_string);
             if (current < maximum) {
                 return true;
             }
@@ -159,7 +159,7 @@ namespace hhc {
             ++input_string;
             ++max_string;
         }
-        return false;
+        return true;
     }
 
     /**

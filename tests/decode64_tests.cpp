@@ -47,6 +47,8 @@ TEST(HhcDecode64Test, Decode64BitSafeReturnsValue) {
     EXPECT_EQ(decoded, 9876543210ULL);
 }
 
+
+
 TEST(HhcDecode64Test, Decode64BitSafeThrowsOnInvalidCharacters) {
     const std::string input = "9lH9ebONz!D";
     EXPECT_THROW(hhc_64bit_decode(input.c_str()), std::invalid_argument);
@@ -62,6 +64,14 @@ TEST(HhcDecode64Test, Decode64BitSafeThrowsTooLongString) {
     std::string input = HHC_64BIT_ENCODED_MAX_STRING;
     input += '1';
     EXPECT_THROW(hhc_64bit_decode(input.c_str()), std::invalid_argument);
+}
+
+TEST(HhcDecode64Test, Decode64BitSafeThrowsOnNullString) {
+    EXPECT_THROW(hhc_64bit_decode(nullptr), std::invalid_argument);
+}
+
+TEST(HhcDecode64Test, Decode64BitSafeThrowsOnEmptyString) {
+    EXPECT_THROW(hhc_64bit_decode(""), std::invalid_argument);
 }
 
 TEST(HhcDecode64Test, Decode64BitSafeUnpaddedInput0) {

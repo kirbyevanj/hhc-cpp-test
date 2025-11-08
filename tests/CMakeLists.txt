@@ -36,6 +36,9 @@ set(HHC_TEST_SOURCES
     encode64_tests.cpp
     decode64_tests.cpp
     validate_tests.cpp
+    bounds_tests.cpp
+    unpad_tests.cpp
+    constants_tests.cpp
 )
 add_executable(hhc_tests ${HHC_TEST_SOURCES})
 target_link_libraries(hhc_tests PRIVATE hhc-cpp gtest gtest_main pthread)
