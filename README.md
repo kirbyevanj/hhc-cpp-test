@@ -73,36 +73,8 @@ ctest --output-on-failure
 ./benchmarks/hhc_benchmarks
 ```
 
-## Using the Library
-
-The library is header-only, so simply include it in your project:
-
-```cpp
-#include "hhc.hpp"
-
-int main() {
-    hhc::hhc_encode();
-    hhc::hhc_decode();
-    hhc::hhc_32bit_encode();
-    hhc::hhc_32bit_decode();
-    hhc::hhc_64bit_encode();
-    hhc::hhc_64bit_decode();
-    return 0;
-}
-```
-
 ## API Reference
 
-### Functions
-
-- `void hhc_encode()` - Encode data using HHC algorithm
-- `void hhc_decode()` - Decode HHC-encoded data
-- `void hhc_32bit_encode()` - Encode data using 32-bit HHC variant
-- `void hhc_32bit_decode()` - Decode 32-bit HHC-encoded data
-- `void hhc_64bit_encode()` - Encode data using 64-bit HHC variant
-- `void hhc_64bit_decode()` - Decode 64-bit HHC-encoded data
-
-All functions are in the `hhc` namespace.
 
 ## External Dependencies
 
@@ -173,10 +145,4 @@ decoded = hhc.decode_64bit("5tVfK4")           # Returns: 9876543210
 ```
 
 See `python/examples/` for more detailed examples.
-
-## Notes
-
-- Benchmarks use `benchmark::ClobberMemory()` to prevent compiler optimizations from eliminating the function calls
-- The library uses a custom 66-character alphabet for encoding
-- Python bindings require pybind11 and Python 3.6+
 
