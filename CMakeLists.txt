@@ -37,6 +37,7 @@ endif()
 include(GNUInstallDirs)
 
 option(HHC_ENABLE_FUZZING "Enable libFuzzer targets" OFF)
+option(HHC_BUILD_PYTHON "Build Python bindings" OFF)
 
 # Header-only library
 add_library(hhc-cpp INTERFACE)
@@ -61,6 +62,9 @@ add_subdirectory(benchmarks)
 add_subdirectory(examples)
 if(HHC_ENABLE_FUZZING)
     add_subdirectory(fuzz)
+endif()
+if(HHC_BUILD_PYTHON)
+    add_subdirectory(python)
 endif()
 
 if(HHC_ENABLE_COVERAGE)

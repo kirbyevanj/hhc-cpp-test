@@ -7,13 +7,16 @@ A C++23 header-only library for HHC encoding/decoding operations.
 ```
 hhc-cpp/
 ├── hhc-cpp/           # Header-only library
-│   └── hhc.hpp
+│   ├── hhc.hpp
+│   └── hhc_constants.hpp
 ├── tests/             # GoogleTest unit tests
-│   ├── CMakeLists.txt
-│   └── test_hhc.cpp
 ├── benchmarks/        # Google Benchmark performance tests
-│   ├── CMakeLists.txt
-│   └── benchmark_hhc.cpp
+├── examples/          # C++ usage examples
+├── python/            # Python bindings (optional)
+│   ├── hhc_python.cpp # pybind11 bindings
+│   ├── setup.py       # Python package setup
+│   └── examples/      # Python usage examples
+├── fuzz/              # LibFuzzer tests (optional)
 ├── CMakeLists.txt     # Root CMake configuration
 └── .gitignore
 ```
@@ -25,6 +28,7 @@ hhc-cpp/
 - CMake 3.20 or higher
 - C++23 compatible compiler (GCC 11+, Clang 15+, or MSVC 2022+)
 - Git (for fetching GoogleTest and Google Benchmark)
+- Python 3.6+ and pybind11 (optional, for Python bindings)
 
 ### Build Instructions
 
@@ -39,6 +43,10 @@ cmake ..
 cmake -DCMAKE_BUILD_TYPE=Release ..
 
 # Build all targets
+cmake --build .
+
+# Or build with Python bindings
+cmake -DHHC_BUILD_PYTHON=ON ..
 cmake --build .
 ```
 
@@ -126,8 +134,49 @@ The `.clangd` config provides:
 - ClangTidy checks for code quality
 - IntelliSense with parameter names and deduced types
 
+## Python Bindings
+
+The library provides Python bindings through pybind11. To use:
+
+### Building with CMake
+
+```bash
+mkdir build && cd build
+cmake -DHHC_BUILD_PYTHON=ON ..
+cmake --build .
+
+# Test the module
+PYTHONPATH=./python python3 -c "import hhc; print(hhc.encode_padded_32bit(42))"
+```
+
+### Building with setuptools
+
+```bash
+cd python
+pip install .
+```
+
+### Python API
+
+```python
+import hhc
+
+# 32-bit operations
+encoded = hhc.encode_padded_32bit(424242)      # Returns: "--.TNv"
+encoded = hhc.encode_unpadded_32bit(424242)    # Returns: ".TNv"
+decoded = hhc.decode_32bit(".TNv")             # Returns: 424242
+
+# 64-bit operations
+encoded = hhc.encode_padded_64bit(9876543210)  # Returns: "-----5tVfK4"
+encoded = hhc.encode_unpadded_64bit(9876543210) # Returns: "5tVfK4"
+decoded = hhc.decode_64bit("5tVfK4")           # Returns: 9876543210
+```
+
+See `python/examples/` for more detailed examples.
+
 ## Notes
 
 - Benchmarks use `benchmark::ClobberMemory()` to prevent compiler optimizations from eliminating the function calls
-- The library functions are currently stubs (TODO) for demonstration purposes
+- The library uses a custom 66-character alphabet for encoding
+- Python bindings require pybind11 and Python 3.6+
 

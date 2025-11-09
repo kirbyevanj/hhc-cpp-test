@@ -53,3 +53,21 @@ coverage/
 # Package managers
 conan/
 vcpkg_installed/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyo
+dist/
+build/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.tox/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
