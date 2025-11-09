@@ -37,16 +37,17 @@ TEST(HhcEncode32Test, Encode32BitTestUINT32_MAX) {
 TEST(HhcEncode32Test, Encode32BitUnpaddedZeroProducesSpaces) {
     std::string output(HHC_32BIT_STRING_LENGTH, '\0');
     hhc_32bit_encode_unpadded(U32_MIN_VALUE, output.data());
-    std::string_view unpadded(output.data(), hhc::HHC_32BIT_ENCODED_LENGTH);
-    EXPECT_EQ(unpadded, std::string(hhc::HHC_32BIT_ENCODED_LENGTH, ' '));
+    // After unpadding, all padding is removed and string is null-terminated
+    // For zero (all padding), the result should be an empty string or single padding char
+    EXPECT_STREQ(output.data(), "");
 }
 
 TEST(HhcEncode32Test, Encode32BitUnpaddedPreservesSignificantDigits) {
     std::string output(HHC_32BIT_STRING_LENGTH, '\0');
     constexpr uint32_t kValue = 1;
     hhc_32bit_encode_unpadded(kValue, output.data());
-    std::string_view unpadded(output.data(), hhc::HHC_32BIT_ENCODED_LENGTH);
-    EXPECT_EQ(unpadded, "     .");
+    // After unpadding, only the significant digit remains at the beginning
+    EXPECT_STREQ(output.data(), ".");
 }
 
 TEST(HhcEncode32Test, Encode32BitUnpaddedMaxRemainsUnchanged) {

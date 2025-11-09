@@ -38,16 +38,17 @@ TEST(HhcEncode64Test, Encode64BitTestUINT64_MAX) {
 TEST(HhcEncode64Test, Encode64BitUnpaddedZeroProducesSpaces) {
     std::string output(HHC_64BIT_STRING_LENGTH, '\0');
     hhc_64bit_encode_unpadded(U64_MIN_VALUE, output.data());
-    std::string_view unpadded(output.data(), hhc::HHC_64BIT_ENCODED_LENGTH);
-    EXPECT_EQ(unpadded, std::string(hhc::HHC_64BIT_ENCODED_LENGTH, ' '));
+    // After unpadding, all padding is removed and string is null-terminated
+    // For zero (all padding), the result should be an empty string
+    EXPECT_STREQ(output.data(), "");
 }
 
 TEST(HhcEncode64Test, Encode64BitUnpaddedPreservesSignificantDigits) {
     std::string output(HHC_64BIT_STRING_LENGTH, '\0');
     constexpr uint64_t kValue = 1;
     hhc_64bit_encode_unpadded(kValue, output.data());
-    std::string_view unpadded(output.data(), hhc::HHC_64BIT_ENCODED_LENGTH);
-    EXPECT_EQ(unpadded, "          .");
+    // After unpadding, only the significant digit remains at the beginning
+    EXPECT_STREQ(output.data(), ".");
 }
 
 TEST(HhcEncode64Test, Encode64BitUnpaddedMaxRemainsUnchanged) {

@@ -28,24 +28,38 @@ namespace hhc {
     }
 
     /**
-     * @brief Unpad a string by replacing the leading '-' characters with ' '
-     * @note The output string is not null-terminated
-     * @param output_string The output string to unpad
+     * @brief Unpad a string by replacing the leading '-' characters with ' ' and moving the non-padded content to the beginning
+     * @note The output string is null-terminated after unpadding
+     * @param output_string The output string to unpad (must be null-terminated)
      */
     constexpr void hhc_unpad_string(char* output_string) {
         assert(output_string != nullptr);
-        while (*output_string == ALPHABET[0]) {
+
+        char* start = output_string;
+        while (*output_string == ALPHABET[0] && *output_string != '\0') {
             *output_string = ' ';
             output_string++;
         }
+        
+        // If we reached the null terminator, all characters were padding
+        if (*output_string == '\0') {
+            start[0] = '\0';
+            return;
+        }
+        
+        // Calculate remaining length including null terminator
+        const std::size_t remaining_len = std::strlen(output_string) + 1;
+        
+        // Move the non-padded characters (including null terminator) to the start
+        std::memmove(start, output_string, remaining_len);
     }
 
     /**
      * @brief Encode a 32-bit integer into a 6-character string without padding
-     * @note The output string is not null-terminated
+     * @note The output string is null-terminated after unpadding
      * @note This version is slower because it needs to unpad the string
      * @param input The 32-bit integer to encode
-     * @param output_string The output string to write the encoded result to
+     * @param output_string The output string to write the encoded result to (must be at least HHC_32BIT_STRING_LENGTH bytes and null-terminated)
      */
     constexpr void hhc_32bit_encode_unpadded(uint32_t input, char* output_string) {
         assert(output_string != nullptr);
@@ -90,10 +104,10 @@ namespace hhc {
 
     /**
      * @brief Encode a 64-bit integer into a 11-character string without padding
-     * @note The output string is not null-terminated
+     * @note The output string is null-terminated after unpadding
      * @note This version is slower because it needs to unpad the string
      * @param input The 64-bit integer to encode
-     * @param output_string The output string to write the encoded result to
+     * @param output_string The output string to write the encoded result to (must be at least HHC_64BIT_STRING_LENGTH bytes and null-terminated)
      */
     constexpr void hhc_64bit_encode_unpadded(uint64_t input, char* output_string) {
         assert(output_string != nullptr);
@@ -179,19 +193,26 @@ namespace hhc {
             throw std::invalid_argument("Invalid HHC string");
         }
 
-        if (!hhc_bounds_check(input_string, HHC_32BIT_ENCODED_MAX_STRING)) {
-            throw std::out_of_range("HHC string exceeds 32-bit bounds");
-        }
-
-        // If the string is not padded, pad it
+        // If the string is not padded, pad it first for bounds checking
         if (length != HHC_32BIT_ENCODED_LENGTH) {
             char padded_string[HHC_32BIT_STRING_LENGTH];
             const std::size_t padding = HHC_32BIT_ENCODED_LENGTH - length;
 
             std::memset(padded_string, ALPHABET[0], padding);
             std::memcpy(padded_string + padding, input_string, length);
-
+            padded_string[HHC_32BIT_ENCODED_LENGTH] = '\0';
+            
+            // Check bounds on the padded string
+            if (!hhc_bounds_check(padded_string, HHC_32BIT_ENCODED_MAX_STRING)) {
+                throw std::out_of_range("HHC string exceeds 32-bit bounds");
+            }
+            
             return hhc_32bit_decode_unsafe(padded_string);
+        }
+
+        // Check bounds on the already-padded string
+        if (!hhc_bounds_check(input_string, HHC_32BIT_ENCODED_MAX_STRING)) {
+            throw std::out_of_range("HHC string exceeds 32-bit bounds");
         }
 
         return hhc_32bit_decode_unsafe(input_string); // Already padded
@@ -206,25 +227,33 @@ namespace hhc {
      */
     constexpr uint64_t hhc_64bit_decode(const char* input_string) {
         if (input_string == nullptr) {
-            throw std::invalid_argument("Invalid HHC string");
+            throw std::invalid_argument("Invalid HHC string (nullptr)");
         }
 
         const std::size_t length = hhc_validate_string(input_string);
         if (length == 0 || length > HHC_64BIT_ENCODED_LENGTH) {
-            throw std::invalid_argument("Invalid HHC string");
+            throw std::invalid_argument("Invalid HHC string (length)");
         }
 
-        if (!hhc_bounds_check(input_string, HHC_64BIT_ENCODED_MAX_STRING)) {
-            throw std::out_of_range("HHC string exceeds 64-bit bounds");
-        }
-
-        // If the string is not padded, pad it
+        // If the string is not padded, pad it first for bounds checking
         if (length != HHC_64BIT_ENCODED_LENGTH) {
             char padded_string[HHC_64BIT_STRING_LENGTH];
             const std::size_t padding = HHC_64BIT_ENCODED_LENGTH - length;
             std::memset(padded_string, ALPHABET[0], padding);
             std::memcpy(padded_string + padding, input_string, length);
+            padded_string[HHC_64BIT_ENCODED_LENGTH] = '\0';
+            
+            // Check bounds on the padded string
+            if (!hhc_bounds_check(padded_string, HHC_64BIT_ENCODED_MAX_STRING)) {
+                throw std::out_of_range("HHC string exceeds 64-bit bounds");
+            }
+            
             return hhc_64bit_decode_unsafe(padded_string);
+        }
+
+        // Check bounds on the already-padded string
+        if (!hhc_bounds_check(input_string, HHC_64BIT_ENCODED_MAX_STRING)) {
+            throw std::out_of_range("HHC string exceeds 64-bit bounds");
         }
 
         return hhc_64bit_decode_unsafe(input_string); // Already padded

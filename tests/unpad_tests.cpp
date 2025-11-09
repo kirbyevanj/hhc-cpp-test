@@ -23,12 +23,9 @@ TEST(HhcUnpadStringTest, ReplacesLeadingPaddingWithSpaces) {
 
     hhc::hhc_unpad_string(buffer.data());
 
-    EXPECT_EQ(buffer[0], ' ');
-    EXPECT_EQ(buffer[1], ' ');
-    EXPECT_EQ(buffer[2], ' ');
-    EXPECT_EQ(buffer[3], 'A');
-    EXPECT_EQ(buffer[4], 'B');
-    EXPECT_EQ(buffer[5], 'C');
+    // After unpadding, the non-padded content is moved to the beginning and null-terminated
+    EXPECT_STREQ(buffer.data(), "ABCD");
+    EXPECT_EQ(buffer[4], '\0');
 }
 
 TEST(HhcUnpadStringTest, StopsAtFirstNonPaddingCharacter) {
@@ -47,9 +44,8 @@ TEST(HhcUnpadStringTest, ConvertsAllPaddingCharactersToSpaces) {
 
     hhc::hhc_unpad_string(buffer.data());
 
-    for (std::size_t i = 0; i < hhc::HHC_32BIT_ENCODED_LENGTH; ++i) {
-        EXPECT_EQ(buffer[i], ' ') << "Index " << i << " was not unpadded";
-    }
-    EXPECT_EQ(buffer[hhc::HHC_32BIT_ENCODED_LENGTH], 'X');
+    // After unpadding, only the non-padded character remains at the beginning
+    EXPECT_STREQ(buffer.data(), "X");
+    EXPECT_EQ(buffer[1], '\0');
 }
 

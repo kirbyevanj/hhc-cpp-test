@@ -47,9 +47,9 @@ void BM_hhc64BitDecodeUnsafe(benchmark::State& state) {
 BENCHMARK(BM_hhc64BitDecodeUnsafe);
 
 /**
- * @brief Benchmark the safe 64-bit decoder with pre-encoded inputs.
+ * @brief Benchmark the safe 64-bit decoder with padded inputs.
  */
-void BM_hhc64BitDecodeSafe(benchmark::State& state) {
+void BM_hhc64BitDecodeSafePadded(benchmark::State& state) {
     Permuted32 permuted32(rand());
     std::array<uint64_t, hhc::bench::kPermutationBlockSize> values{};
     for (auto& value : values) {
@@ -69,7 +69,33 @@ void BM_hhc64BitDecodeSafe(benchmark::State& state) {
         benchmark::DoNotOptimize(output);
     }
 }
-BENCHMARK(BM_hhc64BitDecodeSafe);
+BENCHMARK(BM_hhc64BitDecodeSafePadded);
+
+/**
+ * @brief Benchmark the safe 64-bit decoder with unpadded inputs.
+ */
+void BM_hhc64BitDecodeSafeUnpadded(benchmark::State& state) {
+    Permuted32 permuted32(rand());
+    std::array<uint64_t, hhc::bench::kPermutationBlockSize> values{};
+    for (auto& value : values) {
+        value = next_u64(permuted32);
+    }
+    std::array<std::string, values.size()> inputs{};
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        inputs[i] = std::string(hhc::HHC_64BIT_STRING_LENGTH, 0);
+        hhc::hhc_64bit_encode_unpadded(values[i], inputs[i].data());
+        inputs[i].back() = '\0';
+    }
+
+    std::size_t idx = 0;
+    const std::size_t mask = inputs.size() - 1;
+    for (auto _ : state) {
+        const auto& current = inputs[idx++ & mask];
+        uint64_t output = hhc::hhc_64bit_decode(current.data());
+        benchmark::DoNotOptimize(output);
+    }
+}
+BENCHMARK(BM_hhc64BitDecodeSafeUnpadded);
 
 }  // namespace
 
