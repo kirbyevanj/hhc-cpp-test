@@ -12,39 +12,38 @@ on:
 jobs:
   build-wheels:
     name: Build wheels on ${{ matrix.os }} (${{ matrix.arch }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
         include:
           # AMD64 builds
-          - os: ubuntu-latest
+          - os: ubuntu
             arch: x86_64
+            runs-on: ubuntu-latest
             cibw_arch: x86_64
-          - os: macos-latest
+          - os: macos
             arch: x86_64
+            runs-on: macos-13
             cibw_arch: x86_64
-          - os: windows-latest
+          - os: windows
             arch: AMD64
+            runs-on: windows-latest
             cibw_arch: AMD64
           
-          # ARM64 builds
-          - os: ubuntu-latest
+          # ARM64 builds - use native runners
+          - os: ubuntu
             arch: aarch64
+            runs-on: ubuntu-24.04-arm
             cibw_arch: aarch64
-          - os: macos-latest
+          - os: macos
             arch: arm64
+            runs-on: macos-14
             cibw_arch: arm64
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up QEMU (for ARM64 on Linux)
-      if: matrix.os == 'ubuntu-latest' && matrix.arch == 'aarch64'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: arm64
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -97,20 +96,34 @@ jobs:
 
   test-python:
     name: Test Python Package (${{ matrix.os }}, ${{ matrix.arch }})
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
     needs: [build-wheels]
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          # AMD64 tests
+          - os: ubuntu
             arch: x86_64
+            runs-on: ubuntu-latest
             python: '3.11'
-          - os: macos-latest
+          - os: macos
             arch: x86_64
+            runs-on: macos-13
             python: '3.11'
-          - os: windows-latest
+          - os: windows
             arch: AMD64
+            runs-on: windows-latest
+            python: '3.11'
+          
+          # ARM64 tests
+          - os: ubuntu
+            arch: aarch64
+            runs-on: ubuntu-24.04-arm
+            python: '3.11'
+          - os: macos
+            arch: arm64
+            runs-on: macos-14
             python: '3.11'
 
     steps:

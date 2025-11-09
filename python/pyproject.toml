@@ -41,9 +41,9 @@ build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 skip = ["*-musllinux_*", "pp*"]
 build-verbosity = 1
 
+# Note: Native runners used, no cross-compilation needed
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]
-before-all = "yum install -y clang || apt-get install -y clang"
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
