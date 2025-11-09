@@ -58,6 +58,7 @@ enable_testing()
 # Add subdirectories
 add_subdirectory(tests)
 add_subdirectory(benchmarks)
+add_subdirectory(examples)
 if(HHC_ENABLE_FUZZING)
     add_subdirectory(fuzz)
 endif()
