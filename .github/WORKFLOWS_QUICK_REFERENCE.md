@@ -2,13 +2,13 @@
 
 ## Workflow Triggers Summary
 
-| Workflow | Push (main/develop) | Pull Request | Tags | Schedule | Manual |
+| Workflow | Push (master/develop) | Pull Request | Tags | Schedule | Manual |
 |----------|---------------------|--------------|------|----------|--------|
 | CI | ✅ | ✅ | ❌ | ❌ | ✅ |
 | Python Package | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Fuzzing | ✅ | ✅ | ❌ | ✅ Daily | ✅ |
 | Release | ❌ | ❌ | ✅ v* | ❌ | ✅ |
-| Documentation | ✅ main only | ❌ | ❌ | ❌ | ✅ |
+| Documentation | ✅ master only | ❌ | ❌ | ❌ | ✅ |
 
 ## Architecture Support
 
@@ -61,7 +61,7 @@ git push origin develop
 git add .
 git commit -m "chore: bump version to 1.0.0"
 git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin main
+git push origin master
 git push origin v1.0.0
 # Automatically publishes to pypi.org
 ```

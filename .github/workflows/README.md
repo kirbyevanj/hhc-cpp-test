@@ -5,7 +5,7 @@ This directory contains CI/CD workflows for the HHC C++ library.
 ## Workflows
 
 ### 1. CI (`ci.yml`)
-**Triggers:** Push to main/develop, Pull Requests
+**Triggers:** Push to master/develop, Pull Requests
 
 Comprehensive continuous integration workflow that:
 - **Builds and tests** on multiple platforms (Ubuntu, macOS) and architectures (AMD64, ARM64)
@@ -20,7 +20,7 @@ Comprehensive continuous integration workflow that:
 - Compiler: Clang
 
 ### 2. Python Package (`python.yml`)
-**Triggers:** Push to main/develop, Pull Requests, Tags (v*)
+**Triggers:** Push to master/develop, Pull Requests, Tags (v*)
 
 Python package building and distribution workflow that:
 - **Builds wheels** for multiple Python versions (3.8-3.12) using cibuildwheel
@@ -33,7 +33,7 @@ Python package building and distribution workflow that:
 **Python Versions:** 3.8, 3.9, 3.10, 3.11, 3.12
 
 ### 3. Fuzzing (`fuzzing.yml`)
-**Triggers:** Push to main/develop, Pull Requests, Daily schedule (2 AM UTC)
+**Triggers:** Push to master/develop, Pull Requests, Daily schedule (2 AM UTC)
 
 Fuzzing workflow using LibFuzzer that:
 - **Builds fuzzing targets** (decode32, decode64)
@@ -53,7 +53,7 @@ Release workflow that:
 **Platforms:** Linux (AMD64, ARM64), macOS (AMD64, ARM64)
 
 ### 5. Documentation (`docs.yml`)
-**Triggers:** Push to main
+**Triggers:** Push to master
 
 Documentation generation and deployment workflow that:
 - **Generates API documentation** using Doxygen
@@ -117,7 +117,7 @@ Add these to your README.md:
 ```markdown
 [![CI](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/ci.yml)
 [![Python Package](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/python.yml/badge.svg)](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/python.yml)
-[![codecov](https://codecov.io/gh/kirbyevanj/hhc-cpp/branch/main/graph/badge.svg)](https://codecov.io/gh/kirbyevanj/hhc-cpp)
+[![codecov](https://codecov.io/gh/kirbyevanj/hhc-cpp/branch/master/graph/badge.svg)](https://codecov.io/gh/kirbyevanj/hhc-cpp)
 ```
 
 ## Performance Considerations

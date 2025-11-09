@@ -85,7 +85,7 @@ The project now has a comprehensive CI/CD pipeline supporting:
 
 | Event | Workflows Triggered |
 |-------|---------------------|
-| Push to main/develop | CI, Python Package, Fuzzing |
+| Push to master/develop | CI, Python Package, Fuzzing |
 | Pull Request | CI, Python Package, Fuzzing |
 | Version tag (v*) | Python Package, Release |
 | Daily (2 AM UTC) | Fuzzing |
@@ -205,7 +205,7 @@ cibuildwheel --platform linux
    git add .
    git commit -m "chore: bump version to 1.0.0"
    git tag -a v1.0.0 -m "Release v1.0.0"
-   git push origin main
+   git push origin master
    git push origin v1.0.0
    ```
 
