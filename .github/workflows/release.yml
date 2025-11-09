@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        if [ -z "$PREV_TAG" ]; then
+          echo "First release"
+          CHANGELOG="Initial release"
+        else
+          echo "Generating changelog from $PREV_TAG to ${{ github.ref_name }}"
+          CHANGELOG=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+        fi
+        
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: |
+          ## What's Changed
+          
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ## Installation
+          
+          ### C++ Library (Header-only)
+          ```bash
+          # Clone the repository
+          git clone https://github.com/${{ github.repository }}.git
+          cd hhc-cpp
+          
+          # Install headers
+          cmake -B build
+          sudo cmake --install build
+          ```
+          
+          ### Python Package
+          ```bash
+          pip install hhc
+          ```
+          
+          Or download wheels from the assets below.
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        generate_release_notes: true
+
+  build-release-artifacts:
+    name: Build Release Artifacts (${{ matrix.os }}, ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+            artifact_name: hhc-cpp-linux-amd64
+          - os: ubuntu-latest
+            arch: arm64
+            artifact_name: hhc-cpp-linux-arm64
+          - os: macos-latest
+            arch: amd64
+            artifact_name: hhc-cpp-macos-amd64
+          - os: macos-latest
+            arch: arm64
+            artifact_name: hhc-cpp-macos-arm64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU (for ARM64)
+      if: matrix.arch == 'arm64' && matrix.os == 'ubuntu-latest'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
+
+    - name: Install dependencies (Ubuntu AMD64)
+      if: matrix.os == 'ubuntu-latest' && matrix.arch == 'amd64'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake ninja-build
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake ninja llvm
+
+    - name: Build (AMD64)
+      if: matrix.arch == 'amd64'
+      env:
+        CC: clang
+        CXX: clang++
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=install
+        cmake --build build --parallel
+        cmake --install build --prefix install
+
+    - name: Build (ARM64 Linux)
+      if: matrix.arch == 'arm64' && matrix.os == 'ubuntu-latest'
+      uses: uraimo/run-on-arch-action@v2
+      with:
+        arch: aarch64
+        distro: ubuntu_latest
+        githubToken: ${{ github.token }}
+        dockerRunArgs: |
+          --volume "${PWD}:/workspace"
+        install: |
+          apt-get update -q -y
+          apt-get install -q -y clang cmake ninja-build git
+        run: |
+          cd /workspace
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=install
+          cmake --build build --parallel
+          cmake --install build --prefix install
+
+    - name: Package artifacts
+      run: |
+        cd install
+        tar czf ../${{ matrix.artifact_name }}.tar.gz *
+
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ${{ matrix.artifact_name }}.tar.gz
+

@@ -1,6 +1,12 @@
 # hhc-cpp
 
-A C++23 header-only library for HHC encoding/decoding operations.
+[![CI](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/ci.yml/badge.svg)](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/ci.yml)
+[![Python Package](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/python.yml/badge.svg)](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/python.yml)
+[![Fuzzing](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/fuzzing.yml/badge.svg)](https://github.com/kirbyevanj/hhc-cpp/actions/workflows/fuzzing.yml)
+[![codecov](https://codecov.io/gh/kirbyevanj/hhc-cpp/branch/main/graph/badge.svg)](https://codecov.io/gh/kirbyevanj/hhc-cpp)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+A C++23 header-only library for HHC encoding/decoding operations with Python bindings.
 
 ## Project Structure
 

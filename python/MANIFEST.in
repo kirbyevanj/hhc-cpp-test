@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.py
+include hhc_python.cpp
+recursive-include ../hhc-cpp *.hpp
+global-exclude __pycache__
+global-exclude *.py[co]
+
