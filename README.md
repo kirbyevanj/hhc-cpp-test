@@ -148,7 +148,7 @@ cmake --build .
 |--------|---------|-------------|
 | `HHC_ENABLE_COVERAGE` | `OFF` | Enable LLVM code coverage instrumentation. Requires Clang compiler. Adds a `coverage` target that generates HTML reports. |
 | `HHC_BUILD_PYTHON` | `OFF` | Build Python bindings using pybind11. Requires Python 3.6+ and pybind11. |
-| `HHC_ENABLE_FUZZING` | `OFF` | Build libFuzzer targets for fuzz testing. Requires Clang compiler with fuzzing support. |
+| `HHC_ENABLE_FUZZING` | `OFF` | Build libFuzzer targets for fuzzing. Requires Clang compiler with fuzzing support. |
 | `CMAKE_BUILD_TYPE` | `Release` | Build type: `Debug`, `Release`, `RelWithDebInfo`, or `MinSizeRel`. |
 | `CMAKE_C_COMPILER` | (system default) | C compiler to use (e.g., `clang`, `gcc`). |
 | `CMAKE_CXX_COMPILER` | (system default) | C++ compiler to use (e.g., `clang++`, `g++`). |
