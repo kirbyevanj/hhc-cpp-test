@@ -129,29 +129,6 @@ ctest --output-on-failure
 
 Dependencies are managed via CMake's ExternalProject_Add and will be automatically downloaded and built.
 
-## IDE Setup (clangd)
-
-The project includes a `.clangd` configuration file for accurate IntelliSense. For best results:
-
-1. **Build the project** to generate `compile_commands.json`:
-   ```bash
-   mkdir build && cd build
-   cmake ..
-   ```
-
-2. **Create a symlink** in the project root (optional but recommended):
-   ```bash
-   ln -s build/compile_commands.json compile_commands.json
-   ```
-
-3. **Restart your language server** - clangd will now have full understanding of your project
-
-The `.clangd` config provides:
-- C++23 standard support
-- Proper include paths for the header-only library
-- ClangTidy checks for code quality
-- IntelliSense with parameter names and deduced types
-
 ## Python Bindings
 
 The library provides Python bindings through pybind11. To use:
