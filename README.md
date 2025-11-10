@@ -132,9 +132,25 @@ Dependencies are managed via CMake's ExternalProject_Add and will be automatical
 
 ## Python Bindings
 
-The library provides Python bindings through pybind11. To use:
+The library provides Python bindings through pybind11.
 
-### Building with CMake
+### Installation from PyPI
+
+The easiest way to install the Python package:
+
+```bash
+pip install k-hhc
+```
+
+Or install a specific version:
+
+```bash
+pip install k-hhc==1.0.2
+```
+
+PyPI package: https://pypi.org/project/k-hhc/
+
+### Building from Source with CMake
 
 ```bash
 mkdir build && cd build
