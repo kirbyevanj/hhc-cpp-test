@@ -179,9 +179,9 @@ encoded = k_hhc.encode_unpadded_32bit(424242)    # Returns: ".TNv"
 decoded = k_hhc.decode_32bit(".TNv")             # Returns: 424242
 
 # 64-bit operations
-encoded = k_hhc.encode_padded_64bit(9876543210)  # Returns: "-----5tVfK4"
+encoded = k_hhc.encode_padded_64bit(9876543210)   # Returns: "-----5tVfK4"
 encoded = k_hhc.encode_unpadded_64bit(9876543210) # Returns: "5tVfK4"
-decoded = k_hhc.decode_64bit("5tVfK4")           # Returns: 9876543210
+decoded = k_hhc.decode_64bit("5tVfK4")            # Returns: 9876543210
 ```
 
 See `python/examples/` for more detailed examples.
