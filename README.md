@@ -120,7 +120,7 @@ ctest --output-on-failure
 ```
 
 ## API Reference
-
+C++ API reference is available here:[Doxygen Documentation](https://kirbyevanj.github.io/k-hhc/)
 
 ## External Dependencies
 
