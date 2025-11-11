@@ -45,9 +45,9 @@ jobs:
           find k-hhc -name "*.cpp" -o -name "*.hpp" | \
           xargs -P$(nproc) clang-tidy -p build --warnings-as-errors=""
 
-  # ========== BUILD & TEST C++ ==========
-  build-test-cpp:
-    name: Build & Test C++ (${{ matrix.os }}, ${{ matrix.arch }})
+  # ========== BUILD & TEST ==========
+  build-test:
+    name: Build & Test (${{ matrix.os }}, ${{ matrix.arch }})
     needs: lint
     runs-on: ${{ matrix.runs-on }}
     timeout-minutes: 30
@@ -152,51 +152,6 @@ jobs:
         with:
           name: test-results-cpp-${{ matrix.os }}-${{ matrix.arch }}
           path: build/Testing/
-
-  # ========== BUILD & TEST PYTHON ==========
-  build-test-python:
-    name: Build & Test Python (${{ matrix.os }}, ${{ matrix.arch }})
-    needs: lint
-    runs-on: ${{ matrix.runs-on }}
-    timeout-minutes: 45
-    continue-on-error: ${{ matrix.experimental || false }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Linux AMD64
-          - os: linux
-            arch: amd64
-            runs-on: ubuntu-latest
-            experimental: false
-
-          # Linux ARM64
-          #- os: linux
-          #  arch: arm64
-          #  runs-on: ubuntu-latest-arm64
-          #  experimental: true
-
-          # macOS AMD64
-          - os: macos
-            arch: amd64
-            runs-on: macos-13
-            experimental: false
-
-          # macOS ARM64
-          - os: macos
-            arch: arm64
-            runs-on: macos-14
-            experimental: false
-
-          # Windows AMD64
-          - os: windows
-            arch: amd64
-            runs-on: windows-latest
-            experimental: false
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -327,7 +282,7 @@ jobs:
   ci-status:
     name: CI Status
     runs-on: ubuntu-latest
-    needs: [lint, build-test-cpp, build-test-python]
+    needs: [lint, build-test]
     if: always()
     steps:
       - name: Check status
