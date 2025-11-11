@@ -17,7 +17,6 @@
 
 #ifndef _WIN32
 // Unix-like signal handling
-namespace {
 
 static std::jmp_buf jump_buffer;
 static volatile bool signal_caught = false;
@@ -27,7 +26,6 @@ void signal_handler([[maybe_unused]] int sig) {
     std::longjmp(jump_buffer, 1);
 }
 
-} // namespace
 #endif
 
 // Test that passing condition does not trigger assertion

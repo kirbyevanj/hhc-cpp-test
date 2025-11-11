@@ -12,8 +12,6 @@
  * @brief Unit tests covering 32-bit decoding helpers.
  */
 
-namespace {
-
 constexpr auto U32_MAX_VALUE = std::numeric_limits<uint32_t>::max();
 constexpr auto U32_MIN_VALUE = std::numeric_limits<uint32_t>::min();
 
@@ -25,22 +23,23 @@ using hhc::HHC_32BIT_ENCODED_LENGTH;
 using hhc::HHC_32BIT_STRING_LENGTH;
 using hhc::HHC_32BIT_ENCODED_MAX_STRING;
 
-}  // namespace
+using std::string;
+
 
 TEST(HhcDecode32Test, Decode32BitTestUINT32_MIN) {
-    const std::string input = "------\0\0";
+    const string input = "------\0\0";
     auto output = hhc_32bit_decode_unsafe(input.data());
     EXPECT_EQ(output, U32_MIN_VALUE);
 }
 
 TEST(HhcDecode32Test, Decode32BitTestUINT32_MAX) {
-    const std::string input = "1QLCp1\0\0";
+    const string input = "1QLCp1\0\0";
     auto output = hhc_32bit_decode_unsafe(input.data());
     EXPECT_EQ(output, U32_MAX_VALUE);
 }
 
 TEST(HhcDecode32Test, Decode32BitSafeReturnsValue) {
-    std::string encoded(HHC_32BIT_STRING_LENGTH, '\0');
+    string encoded(HHC_32BIT_STRING_LENGTH, '\0');
     hhc_32bit_encode_padded(424242U, encoded.data());
     encoded.resize(HHC_32BIT_ENCODED_LENGTH);
     auto decoded = hhc_32bit_decode(encoded.c_str());
@@ -48,18 +47,18 @@ TEST(HhcDecode32Test, Decode32BitSafeReturnsValue) {
 }
 
 TEST(HhcDecode32Test, Decode32BitSafeThrowsOnInvalidCharacters) {
-    const std::string input = "1QLCP!";
+    const string input = "1QLCP!";
     EXPECT_THROW(hhc_32bit_decode(input.c_str()), std::invalid_argument);
 }
 
 TEST(HhcDecode32Test, Decode32BitSafeThrowsOnOutOfRange) {
-    std::string input = HHC_32BIT_ENCODED_MAX_STRING;
+    string input = HHC_32BIT_ENCODED_MAX_STRING;
     input.back() = '2';
     EXPECT_THROW(hhc_32bit_decode(input.c_str()), std::out_of_range);
 }
 
 TEST(HhcDecode32Test, Decode32BitSafeThrowsTooLongString) {
-    std::string input = HHC_32BIT_ENCODED_MAX_STRING;
+    string input = HHC_32BIT_ENCODED_MAX_STRING;
     input.back() = '0';
     input += '.';
     EXPECT_THROW(hhc_32bit_decode(input.c_str()), std::invalid_argument);
@@ -95,22 +94,20 @@ TEST(HhcDecode32Test, Decode32BitSafeUnpaddedInput6Characters1) {
 
 TEST(HhcDecode32Test, RoundTrip32BitTestFirst1Million) {
     for (uint32_t i = 0; i < 1000000; i++) {
-        std::string output(HHC_32BIT_STRING_LENGTH, 0);
+        string output(HHC_32BIT_STRING_LENGTH, 0);
         hhc_32bit_encode_padded(i, output.data());
         auto decoded = hhc_32bit_decode_unsafe(output.data());
         ASSERT_EQ(decoded, i);
     }
 }
 
-// ========== SECURITY TESTS ==========
-// Test that bounds checking works correctly for unpadded strings
 
 TEST(HhcDecode32Test, SecurityUnpaddedMaxValueAccepted) {
     // The max value (1QLCp1) should be accepted when unpadded
     EXPECT_NO_THROW({
         auto result = hhc_32bit_decode("1QLCp1");
         EXPECT_EQ(result, U32_MAX_VALUE);
-    });
+    });using std::size_t;
 }
 
 TEST(HhcDecode32Test, SecurityUnpaddedOutOfRangeRejected) {
