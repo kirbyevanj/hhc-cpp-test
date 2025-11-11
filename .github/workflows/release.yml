@@ -303,41 +303,6 @@ jobs:
           skip-existing: true
           verbose: true
 
-  # ========== PUBLISH TO TEST PYPI (OPTIONAL) ==========
-  publish-test-pypi:
-    name: Publish to Test PyPI
-    needs: build-release-artifacts
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/project/k-hhc/
-    permissions:
-      id-token: write
-    steps:
-      - name: Download Python packages
-        uses: actions/download-artifact@v6
-        with:
-          pattern: wheels-*
-          path: dist
-          merge-multiple: true
-
-      - name: Download source distribution
-        uses: actions/download-artifact@v6
-        with:
-          name: sdist
-          path: dist
-
-      - name: List packages
-        run: ls -la dist/
-
-      - name: Publish to Test PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          skip-existing: true
-          verbose: true
-
   # ========== RELEASE STATUS CHECK ==========
   release-status:
     name: Release Status
