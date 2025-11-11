@@ -224,10 +224,12 @@ jobs:
           ### Python Package
           \`\`\`bash
           pip install k-hhc==${{ steps.get_tag.outputs.version }}
+          pip install <your-platforms-python-wheel-name>.whl
+          pip install <source-distribution-name>.tar.gz
           \`\`\`
           
           ### C++ Library
-          Download the appropriate archive for your platform from the assets below.
+          Just clone https://github.com/kirbyevanj/k-hhc.git and build the project.
           
           ## Checksums
           
