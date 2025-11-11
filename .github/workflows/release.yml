@@ -32,12 +32,6 @@ jobs:
             runs-on: ubuntu-latest
             experimental: false
 
-          # Linux ARM64
-          - os: linux
-            arch: arm64
-            runs-on: ubuntu-latest-arm64
-            experimental: true
-
           # macOS AMD64
           - os: macos
             arch: amd64
