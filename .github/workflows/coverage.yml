@@ -2,9 +2,9 @@ name: Code Coverage
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, staging, develop ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, staging, develop ]
   workflow_dispatch:
   schedule:
     # Run weekly on Monday at 3 AM UTC
@@ -43,9 +43,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHHC_ENABLE_COVERAGE=ON \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_CXX_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping"
+            -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build Release
         run: cmake --build build-release --parallel
@@ -72,9 +70,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DHHC_ENABLE_COVERAGE=ON \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_CXX_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping"
+            -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build Debug
         run: cmake --build build-debug --parallel
@@ -99,19 +95,19 @@ jobs:
           
           llvm-cov report ../build-release/tests/hhc_tests ../build-debug/tests/hhc_tests \
             --instr-profile=coverage-combined.profdata \
-            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/)" \
+            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/|hhc_assert\.hpp|hhc_constants\.hpp)" \
             > coverage-summary.txt
           
           llvm-cov show ../build-release/tests/hhc_tests ../build-debug/tests/hhc_tests \
             --instr-profile=coverage-combined.profdata \
             --format=html \
             --output-dir=coverage-html \
-            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/)"
+            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/|hhc_assert\.hpp|hhc_constants\.hpp)"
           
           llvm-cov export ../build-release/tests/hhc_tests ../build-debug/tests/hhc_tests \
             --instr-profile=coverage-combined.profdata \
             --format=lcov \
-            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/)" \
+            --ignore-filename-regex="(tests/|benchmarks/|examples/|build/|hhc_assert\.hpp|hhc_constants\.hpp)" \
             > coverage.lcov
 
       - name: Display coverage summary

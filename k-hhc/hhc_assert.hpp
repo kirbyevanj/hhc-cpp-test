@@ -4,6 +4,12 @@
 #include <cstdlib>
 #include <iostream>
 
+#if defined(__clang__)
+#  define HHC_NO_PROFILE __attribute__((no_profile_instrument_function))
+#else
+#  define HHC_NO_PROFILE
+#endif
+
 // Platform-specific includes for stack traces
 // Check Windows first (clang-cl defines __clang__ but not __unix__)
 #if defined(_WIN32) || defined(_WIN64)
@@ -22,10 +28,22 @@
 
 namespace hhc::detail {
 
+#ifdef LLVM_BUILD_INSTRUMENTED
+HHC_NO_PROFILE
+extern "C" int __llvm_profile_write_file(void);
+inline void flush_coverage_profile() {
+    (void)__llvm_profile_write_file();
+}
+#else
+inline void flush_coverage_profile() {}
+#endif
+
+
     /**
      * @brief Print stack trace (debug builds only)
      */
-    inline void print_stack_trace() {
+    HHC_NO_PROFILE inline void print_stack_trace() {
+
 #if defined(HHC_HAVE_BACKTRACE)
         // Unix-like systems (Linux, macOS, BSD)
         constexpr int max_frames = 64;
@@ -85,10 +103,10 @@ namespace hhc::detail {
      * @param line Line number
      * @param function Function name
      */
-    [[noreturn]] inline void assertion_failed(const char* expression,
-                                              const char* file,
-                                              const int line,
-                                              const char* function) {
+    [[noreturn]] HHC_NO_PROFILE inline void assertion_failed(const char* expression,
+                                                             const char* file,
+                                                             const int line,
+                                                             const char* function) {
 #ifndef NDEBUG
         // Debug build: provide stack trace and error message
         std::cerr << "\n╔═════════════════════════════════════════════════════════════╗\n"
@@ -103,6 +121,7 @@ namespace hhc::detail {
         std::cerr << "This is a critical error indicating a bug in the HHC library.\n"
                   << "Please report this issue with the above information.\n\n";
         
+        flush_coverage_profile();
         std::abort();
 #else
         // Release build: generate trap instruction
@@ -114,6 +133,8 @@ namespace hhc::detail {
         (void)file;
         (void)line;
         (void)function;
+        
+        flush_coverage_profile();
         
         // Use compiler built-in to generate trap instruction
         #if defined(__GNUC__) || defined(__clang__)
