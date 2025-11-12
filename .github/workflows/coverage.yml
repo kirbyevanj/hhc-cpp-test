@@ -2,9 +2,9 @@ name: Code Coverage
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, staging, develop ]
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, staging, develop ]
   workflow_dispatch:
   schedule:
     # Run weekly on Monday at 3 AM UTC
@@ -43,9 +43,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DHHC_ENABLE_COVERAGE=ON \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_CXX_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping"
+            -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build Release
         run: cmake --build build-release --parallel
@@ -72,9 +70,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DHHC_ENABLE_COVERAGE=ON \
             -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping" \
-            -DCMAKE_CXX_FLAGS="--coverage -fprofile-instr-generate -fcoverage-mapping"
+            -DCMAKE_CXX_COMPILER=clang++
 
       - name: Build Debug
         run: cmake --build build-debug --parallel
