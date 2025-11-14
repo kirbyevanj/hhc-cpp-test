@@ -68,15 +68,9 @@ jobs:
           #  runs-on: ubuntu-latest-arm64
           #  experimental: true
 
-          # macOS AMD64
+          # macOS universal2 (covers both x86_64 and arm64)
           - os: macos
-            arch: amd64
-            runs-on: macos-13
-            experimental: false
-
-          # macOS ARM64
-          - os: macos
-            arch: arm64
+            arch: universal2
             runs-on: macos-14
             experimental: false
 
@@ -100,6 +94,11 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install cmake ninja llvm
+      
+      - name: Install Rosetta (for x86_64 testing)
+        if: runner.os == 'macOS'
+        run: |
+          softwareupdate --install-rosetta --agree-to-license || true
 
       - name: Setup build environment (Windows)
         if: runner.os == 'Windows'
@@ -217,7 +216,7 @@ jobs:
           ls -la wheelhouse/ || find wheelhouse -name "*.whl" || true
           
           # Find the abi3 wheel (should be only one per platform)
-          # Note: We build on cp38-*, but due to setup.cfg [bdist_wheel] py-limited-api = cp37,
+          # Note: We build on cp311-*, but due to setup.cfg [bdist_wheel] py-limited-api = cp37,
           # the wheel is automatically tagged as cp37-abi3, making it compatible with Python 3.7+
           # Try multiple patterns to handle different platforms
           ABI3_WHEEL=$(find wheelhouse -name "*-cp37-abi3-*.whl" 2>/dev/null | head -1)
@@ -225,6 +224,11 @@ jobs:
           # If not found with cp37-abi3, try just abi3
           if [ -z "$ABI3_WHEEL" ]; then
             ABI3_WHEEL=$(find wheelhouse -name "*-abi3-*.whl" 2>/dev/null | head -1)
+          fi
+          
+          # macOS: also try universal2 pattern
+          if [ -z "$ABI3_WHEEL" ] && [[ "${{ matrix.os }}" == "macos" ]]; then
+            ABI3_WHEEL=$(find wheelhouse -name "*universal2*.whl" 2>/dev/null | head -1)
           fi
           
           # If still not found, try to find any wheel (fallback)
@@ -248,10 +252,32 @@ jobs:
             echo "✓ Confirmed abi3 wheel: $ABI3_WHEEL"
           fi
           
-          # Test with the Python version set up by the CI action
+          # macOS-specific: Verify universal2 wheel has both architectures
+          if [[ "${{ matrix.os }}" == "macos" ]]; then
+            echo "Verifying universal2 wheel architectures..."
+            unzip -q "$ABI3_WHEEL" -d /tmp/wheel_extract
+            # Find the extension file (could be .so or .dylib on macOS)
+            EXTENSION_SO=$(find /tmp/wheel_extract -name "k_hhc*.so" -o -name "k_hhc*.dylib" | head -1)
+            if [ -n "$EXTENSION_SO" ]; then
+              ARCH_INFO=$(lipo -info "$EXTENSION_SO" 2>&1)
+              echo "Architecture info: $ARCH_INFO"
+              if [[ "$ARCH_INFO" == *"x86_64"* ]] && [[ "$ARCH_INFO" == *"arm64"* ]]; then
+                echo "✓ Universal2 wheel contains both x86_64 and arm64 slices"
+              else
+                echo "::error::Universal2 wheel missing required architectures"
+                echo "Expected both x86_64 and arm64, got: $ARCH_INFO"
+                exit 1
+              fi
+            else
+              echo "::warning::Could not find extension file in wheel to verify architectures"
+            fi
+            rm -rf /tmp/wheel_extract
+          fi
+          
+          # Test with the Python version set up by the CI action (native architecture)
           PYTHON_CMD="python"
           PYTHON_VERSION=$(python --version 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
-          echo "Testing with $PYTHON_CMD (version $PYTHON_VERSION)"
+          echo "Testing with $PYTHON_CMD (version $PYTHON_VERSION) - native architecture"
           
           # Upgrade pip and install pytest
           python -m pip install --upgrade pip --quiet
@@ -273,7 +299,39 @@ jobs:
           echo "✓ decode example passed with $PYTHON_CMD"
           cd ..
           
-          # Uninstall
+          # macOS-specific: Test x86_64 slice using Rosetta
+          if [[ "${{ matrix.os }}" == "macos" ]]; then
+            echo "Testing x86_64 slice with Rosetta..."
+            PYTHON_X86_64="arch -x86_64 python"
+            PYTHON_X86_64_VERSION=$(arch -x86_64 python --version 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
+            echo "Testing with x86_64 Python (version $PYTHON_X86_64_VERSION) via Rosetta"
+            
+            # Install pytest for x86_64 Python
+            arch -x86_64 python -m pip install --upgrade pip --quiet
+            arch -x86_64 python -m pip install pytest --quiet
+            
+            # Install the wheel for x86_64 Python
+            arch -x86_64 python -m pip install --force-reinstall --no-deps "$ABI3_WHEEL"
+            echo "✓ Wheel installed successfully for x86_64"
+            
+            # Run tests with x86_64 Python
+            cd python
+            arch -x86_64 python -m pytest test_hhc.py -v
+            echo "✓ pytest passed with x86_64 Python"
+            
+            arch -x86_64 python examples/encode_example.py
+            echo "✓ encode example passed with x86_64 Python"
+            
+            arch -x86_64 python examples/decode_example.py
+            echo "✓ decode example passed with x86_64 Python"
+            cd ..
+            
+            # Uninstall x86_64 installation
+            arch -x86_64 python -m pip uninstall -y k-hhc k_hhc 2>/dev/null || true
+            echo "✓ Successfully tested x86_64 slice with Python $PYTHON_X86_64_VERSION"
+          fi
+          
+          # Uninstall native installation
           python -m pip uninstall -y k-hhc k_hhc 2>/dev/null || true
           
           echo "✓ Successfully tested abi3 wheel with Python $PYTHON_VERSION"
