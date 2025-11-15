@@ -161,20 +161,14 @@ jobs:
         env:
           # Build targets per matrix entry (abi3 wheel produced from cp311)
           CIBW_BUILD: ${{ matrix.cibw_build }}
-          # Restrict Linux archs to x86_64 to avoid aarch64 runners entirely
+          # Only x86_64 on Linux runners
           CIBW_ARCHS_LINUX: "x86_64"
           # Prefer modern base images for toolchains
           CIBW_MANYLINUX_X86_64: "manylinux_2_28"
-          CIBW_MUSLLINUX_X86_64: "musllinux_1_2"
-          # If policy override above is ignored, force the exact image as a fallback
-          CIBW_MUSLLINUX_X86_64_IMAGE: "quay.io/pypa/musllinux_1_2_x86_64"
-          # Use default compilers in containers; no distro pkg installs
+          # musllinux needs libexecinfo to provide execinfo.h/backtrace(), and link with -lexecinfo
+          CIBW_BEFORE_BUILD_MUSLLINUX: "apk update && apk add --no-cache libexecinfo-dev"
           CIBW_ENVIRONMENT_LINUX: "CC=gcc CXX=g++"
-          CIBW_ENVIRONMENT_MUSLLINUX: "CC=gcc CXX=g++"
-          # Disable any project-level before_all hooks that try to run dnf/yum/apk
-          CIBW_BEFORE_ALL: ":"
-          CIBW_BEFORE_ALL_LINUX: ":"
-          CIBW_BEFORE_ALL_MUSLLINUX: ":"
+          CIBW_ENVIRONMENT_MUSLLINUX: "CC=gcc CXX=g++ LDFLAGS='-lexecinfo'"
           # Skip PyPy
           CIBW_SKIP: "pp*"
           # Tests run inside the appropriate container/venv per wheel
